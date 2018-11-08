@@ -1,8 +1,5 @@
 ---
-title: "R Notebook"
-output:
-  rmarkdown::github_document
-  pdf_document: default
+output: rmarkdown::github_document
 ---
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE, fig.path = "README_figs/README-")
@@ -20,7 +17,7 @@ library(tidyverse)
 library(GGally)
 library(scales)
 library(memisc)
-loans <- read.csv("prosperLoanData.csv")
+loans <- read.csv("https://www.google.com/url?q=https://s3.amazonaws.com/udacity-hosted-downloads/ud651/prosperLoanData.csv&sa=D&ust=1537996947824000")
 
 # To get an understanding of the variables I am dealing with
 str(loans)
