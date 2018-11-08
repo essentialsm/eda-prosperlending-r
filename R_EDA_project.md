@@ -1,0 +1,489 @@
+---
+output: rmarkdown::github_document
+---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE, fig.path = "README_figs/README-")
+options(scipen=999)
+```
+<h1> Udacity EDA Project </h1>
+Prosper is a peer-to-peer lending marketplace headquartered in San Francisco, CA. 
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(RColorBrewer)
+library(tidyverse)
+library(GGally)
+library(scales)
+library(memisc)
+loans <- read.csv("https://www.google.com/url?q=https://s3.amazonaws.com/udacity-hosted-downloads/ud651/prosperLoanData.csv&sa=D&ust=1537996947824000")
+
+# To get an understanding of the variables I am dealing with
+str(loans)
+```
+
+```{r}
+# Just to get a feel of the data
+head(loans)
+```
+
+This huge dataset contains 113,937 loans made with 81 variables. Further elaboration of each variable can be found here (https://docs.google.com/spreadsheets/d/1gDyi_L4UvIrLTEC6Wri5nbaMmkGmLQBk-Yx3z0XDEtI/edit#gid=0).
+
+
+```{r}
+loans_date_freq <- setNames(data.frame(table(loans$LoanOriginationQuarter)), 
+                            c('Date', 'No_of_loans'))
+
+loans_date_freq$Date = factor(loans_date_freq$Date,
+                              levels = c('Q4 2005',
+                                  'Q1 2006','Q2 2006','Q3 2006','Q4 2006',
+                                  'Q1 2007','Q2 2007','Q3 2007','Q4 2007',
+                                  'Q1 2008','Q2 2008','Q3 2008','Q4 2008',
+                                  'Q1 2009','Q2 2009','Q3 2009','Q4 2009',
+                                  'Q1 2010','Q2 2010','Q3 2010','Q4 2010',
+                                  'Q1 2011','Q2 2011','Q3 2011','Q4 2011',
+                                  'Q1 2012','Q2 2012','Q3 2012','Q4 2012',
+                                  'Q1 2013','Q2 2013','Q3 2013','Q4 2013',
+                                  'Q1 2014'))
+
+ggplot(data = loans_date_freq, aes(x = Date, y = No_of_loans, group = 1)) +
+  geom_line(colour = "purple") + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  ylab('No. of loans') + 
+  xlab('Period')
+```
+
+```{r}
+# To calculate the total amount of loans made in a year
+
+loans_date_freq <- loans_date_freq %>%
+                   mutate(Year = substring(Date,4,8)) 
+
+aggregate(loans_date_freq$No_of_loans, by=list(Category=loans_date_freq$Year), 
+          FUN=sum)
+```
+
+To get a sense of loan activity across the timespan of this data set, I plotted the count of loans across all recorded quarters. 2 major dips (over a span of at least 2 quarters) can be observed.
+
+The first one started in Q2 2008 and lasted until Q2 2009. This period was also when the 2008 global financial crisis was at its peak and probably also had an impact on borrowing activity. In fact it seemed that there was a temporary shutdown in the first quarter of 2009 with no loans being listed. A quick check on Wikipedia reveals that Prosper received a cease and desist order in late 2008 and had to obtain SEC registration for its loan before relaunching their website on July 2009.
+
+The second dip occurred in the last 2 quarters of 2012. This could be due to Quantitative Easing measures implemented by the Fed amidst the Eurozone Debt Crisis. This lowered interest rates and probably made it cheaper to borrow elsewhere.
+
+Overall, Prosper has seen robust growth, recovering from the financial crisis by 2011 and then more than tripling the number of loans from 2011 - 2013.
+
+
+```{r}
+ggplot(data = loans, aes(x = BorrowerState)) + 
+  geom_bar(stat = 'count', fill = I('#B46978')) + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  ylab('No. of loans') + 
+  xlab('State')
+```
+
+Notes:
+To get a sense of the geographical distribution of the loans, I plotted the counts of loans in all US States. The States with the most loans are California, Texas, New York, Florida and Illinois. 
+
+The rankings in this chart also roughly mirror that of economy size. I.e. The bigger the state's economy, the more loans are made. There might also be more loans in California because that's where Prosper orignates from and has the best market penetration. This would have to be corroborated with other loan datasets.
+
+```{r}
+loans_sorted_by_date <- loans %>%
+  arrange(desc(ListingCreationDate))
+  
+loans_sorted_by_date$TotalProsperLoans[is.na(loans_sorted_by_date$TotalProsperLoans)] <- 0
+  
+ggplot(data = subset(loans_sorted_by_date, !duplicated(MemberKey)), 
+       aes(x = TotalProsperLoans)) + 
+  geom_bar(na.rm = FALSE, fill = I('#3D92FE')) + 
+  ylab('No. of borrowers') + 
+  xlab('No. of loans made on Prosper')
+```
+
+Notes:
+I was curious if borrowing activity was driven by first-time borrowers or repeat borrowers. I sorted the dataset in descending order against the listing dates, converted the N/A value to 0 and then subsetted the dataset to remove duplicate entries of repeated borrowers. Since the dataset was already rearranged, total prosper loans would be reflected from data of the latest loans.
+
+It seems like most people are first-time borrowers and recurring borrowing activity is not a feature of the platform. Apart from people might try to keep their loans to the minimum, this might also be due to the fact that peer-to-peer lending is relatively new and so most people have only had short exposure to it.
+
+```{r}
+loans$ListingCategory..numeric. <- factor(loans$ListingCategory..numeric.)
+
+ggplot(data = loans, aes(x = fct_infreq(loans$ListingCategory..numeric.))) + 
+  geom_bar(stat = 'count', fill = I('#7CC6FE')) + 
+  scale_x_discrete(labels = c("0" = "Not Available", "1" = "Debt Consolidation",
+                              "2" = "Home Improvement", "3" = "Business",
+                              "4" = "Personal Loan", "5" = "Student Use", 
+                              "6" = "Auto", "7" = "Other", "8" = "Baby&Adoption",
+                              "9" = "Boat", "10" = "Cosmetic Procedure", 
+                              "11" = "Engagement Ring", "12" = "Green Loans",
+                              "13" = "Household Expenses", 
+                              "14" = "Large Purchases", "15" = "Medical/Dental", 
+                              "16" = "Motorcycle", "17" = "RV", "18" = "Taxes", 
+                              "19" =  "Vacation", "20" = "Wedding Loans")) +
+  xlab('Listing Category') + 
+  ylab('No. of borrowers') +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  geom_text(stat='count', aes(label= ..count..), vjust= - 0.5, size = 3)
+```
+
+Notes:
+Overwhelming majority of loans were listed with the stated reason of Debt Consolidation. From what was observed in the previous visualisation, it seems that users are using Prosper to consolidate loans from other sources (since most users are one time borrowers). Perhaps Prosper offers better interest rates. Interesting to note that the next two biggest categories are 'Not Available' and 'Other' which obscures any clear reason.
+
+```{r}
+ggplot(data = loans, aes(x = Occupation)) + 
+  geom_bar(stat = 'count', fill = I('#B46978')) + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+Notes:
+The 2 occupations that have the greatest counts (Other and Professional) are also the most ambiguous options. People might have selected this option because they feel their occupation is not accurately captured by other optionns or that they do not feel comfortable disclosing this detail. Given its ambiguity, it doesn't seem to be a impactful data point.
+
+```{r}
+#Y-scale was transformed to show shallow tail of loans with friends as investors
+
+ggplot(data = loans, aes(x = InvestmentFromFriendsCount)) + 
+     geom_histogram(binwidth = 1, fill = I('#7CC6FE')) + 
+     scale_y_log10() +
+     geom_text(stat='count', aes(label= ..count..), vjust= - 0.5, size = 3) +
+     xlab('No. of friends') + 
+     ylab('No. of loans')
+```
+
+Notes:
+I wanted to understand if there was a 'social' element to investing in Prosper loans, which might be differentiate it from other mediums and could be a useful growth mechanism. To my surprise, it seems the case that investing in loans on Prosper is a very individualistic decision. Most investments do not have participation from friends. Or effective mechanisms have not been built to track friend participation.
+
+```{r}
+ggplot(data = loans, aes(x = LoanOriginalAmount)) + 
+  geom_histogram(binwidth = 500, fill = I('#00A9A5')) + 
+  scale_x_continuous(breaks = seq(0, 35000, 1000)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+Notes:
+In terms of amounts borrowed, it seems that people tend to borrow in multiples of $5000 in larger sums (>$5000) or multiples of $1000 in smaller sums ($5000=<). Accordingly, I went ahead to bucket loans $5000 multiples to use for further analysis.
+
+```{r}
+loans$LOA.bucket <- cut(loans$LoanOriginalAmount, 
+                        breaks = c(0, 5000, 10000, 15000, 20000, 25000, 40000), 
+                        labels = c("$0 - 4999", "$5000 - 9999", "$10000 - 14999", 
+                                   "$15000 - 19999","$20000 - 24999", "$25000+"))
+loans$LoanOriginationQuarter = factor(loans$LoanOriginationQuarter,
+                                      levels = c('Q4 2005',
+                                        'Q1 2006','Q2 2006','Q3 2006','Q4 2006',
+                                        'Q1 2007','Q2 2007','Q3 2007','Q4 2007',
+                                        'Q1 2008','Q2 2008','Q3 2008','Q4 2008',
+                                        'Q1 2009','Q2 2009','Q3 2009','Q4 2009',
+                                        'Q1 2010','Q2 2010','Q3 2010','Q4 2010',
+                                        'Q1 2011','Q2 2011','Q3 2011','Q4 2011',
+                                        'Q1 2012','Q2 2012','Q3 2012','Q4 2012',
+                                        'Q1 2013','Q2 2013','Q3 2013','Q4 2013',
+                                        'Q1 2014'))
+
+ggplot(loans, aes(x = LoanOriginationQuarter, color = LOA.bucket)) + 
+  stat_count(geom = 'line', aes(y=..count.., group = 1)) + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  facet_wrap(~LOA.bucket, ncol = 2) +
+  guides(color = guide_legend(title = "Loan Size"))
+```
+
+Notes:
+This collection of graphs show how loans of different sizes grew overtime.
+
+In the earlier years, small loans of less than $5000 were the primary driver of growth. Probably due to the novelty of an online loan marketplace, people were more inclined to experiment with it in smaller amounts of money.
+
+However since 2012, bigger loans (5000 - 15000) started to gain popularity, possibly as a consequence of people looking for alternative sources of funding after the financial crisis.
+
+The success of bigger loan sizes might have encouraged a larger maximum limit to loans. As can be observed, from 2013, loan size in excess of 25000 was introduced. If indeed bigger loans on Prosper are becoming more mainstream, this points to exciting future possiblities for the platform.
+
+```{r}
+#Loans with 1 investor vs multiple investors
+table(loans$Investors > 1)
+```
+
+```{r}
+#This graph excludes loans that only have one investor.
+ggplot(data = loans, aes(x = Investors)) + 
+  geom_histogram(aes(color = LOA.bucket, fill = LOA.bucket), binwidth = 1) + 
+  coord_trans(x = "log10") + 
+  xlim(2, 1000)
+```
+
+
+Notes:
+I was curious about how diverse the investor base for loans of different sizes. To my surprise, a quarter of all loans have only 1 investor. There is however a long tail of loans with a wide range of investors in terms of numbers.
+
+Generally, loans of all sizes are funded by a numerical spectrum of investors. That said, for loans that are larger, there tends to be more investors that participate in that investment. So loans that have ~50 investors or less are usually below $5000, loans that have ~125 investors tend to be bigger (5000 - 9999), loans that have ~250 investors tend to be bigger (10000 - 14999) and so on.
+
+(The above plot excludes loans that have only 1 investor so that detail in the long tail can be more explicit.)
+
+```{r}
+#Factoring of Credit Grades to determine arrangement of plots
+
+loans$CreditGrade = factor(loans$CreditGrade,
+                           levels = c('AA','A','B','C','D','E','HR','NC'))
+
+ggplot(data = subset(loans, CreditGrade != ""), aes(x = LoanStatus)) + 
+  geom_bar(stat = "count", fill = I('#B46978')) + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  facet_wrap(~CreditGrade, ncol = 4)
+```
+
+```{r}
+#To find the proportion of completed loans in different Credit Grades
+
+cg_com_ratio <- subset(loans, CreditGrade != "") %>%
+  group_by(CreditGrade, LoanStatus) %>%
+  summarise(count = n() ) %>%
+  mutate(prop = count / sum(count)) 
+  
+print(cg_com_ratio %>%
+  filter(LoanStatus == 'Completed'))
+```
+
+Notes:
+Credit Grading is an important concept in helping investor assess risks. I saw two sets of grades, one that applied pre-2009 and one after. I wanted to find out how each grade-set performed. Starting with credit grading pre-2009.
+
+Looking at how different Credit Grades performed in the past, the proportion of completed loans gets progressively larger as one goes from NC - AA. Loans seem to be normally distributed with C loans having the biggest volume being the average grade and NC loans have the least volume which makes sense, since they are a category that is least likely to return the loan. 
+
+```{r}
+#Factoring of Prosper Rating to determine arrangement of plots
+
+loans$ProsperRating..Alpha. = factor(loans$ProsperRating..Alpha.,
+                                     levels = c('AA','A','B','C','D','E','HR'))
+
+ggplot(data = subset(loans, ProsperRating..Alpha. != ""), aes(x = LoanStatus)) + 
+  geom_bar(stat = "count", fill = I('#3D92FE')) + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  facet_wrap(~ProsperRating..Alpha., ncol = 4)
+```
+
+```{r}
+#To find the proportion of completed loans in different Prosper Ratings
+
+pr_com_ratio <- subset(loans, ProsperRating..Alpha. != "" & LoanStatus != "Current") %>%
+  group_by(ProsperRating..Alpha., LoanStatus) %>%
+  summarise(count = n() ) %>%
+  mutate(prop = count / sum(count))
+  
+print(pr_com_ratio %>%
+  filter(LoanStatus == 'Completed'))
+```
+
+Notes:
+New Prosper Ratings seem to have a couple of additional Status categories. Majority of loans are still current, so this subset might be excluded for analysis of performance. 
+
+Excluding current loans, the new grade set indicates better performance across all grades as compared to the previous credit grading. This is definitely a step in the right direction.
+
+```{r}
+ggplot(data = subset(loans, !(is.na(ProsperRating..Alpha.))), 
+       aes(x = ProsperRating..Alpha., y = LenderYield)) + 
+  geom_boxplot(aes(fill = ProsperRating..Alpha.)) +
+  guides(fill = guide_legend(title = "Prosper Rating")) + 
+  scale_fill_brewer(type = 'div', palette = 8, direction = -1)
+```
+
+```{r}
+with(loans, by(LenderYield, ProsperRating..Alpha., summary))
+```
+
+Notes:
+From an investor/lender's perspective, Prosper Ratings is an important factor in determining yield. Riskier loans have higher yields as can be observed from the boxplot and stat summaries above. 
+
+```{r fig.height = 10, fig.width = 10}
+set.seed(2002002)
+loans_reduced <- subset(loans, 
+                        select = c(BorrowerRate, EstimatedLoss, IncomeRange,
+                                   ProsperRating..Alpha., EmploymentStatus,
+                                   TotalCreditLinespast7years, TotalInquiries,
+                                   LoanOriginalAmount, MonthlyLoanPayment,
+                                   LoanStatus, DebtToIncomeRatio, LenderYield))
+
+loans_samp <- loans_reduced[sample(1:length(loans_reduced$LoanStatus), 10000), ]
+ggpairs(loans_samp, axisLabels = 'internal', 
+        lower = list(continuous = wrap('points', alpha = 0.3, shape = I('.')), 
+                     combo = 'facethist'), upper = list(continuous = 'cor')) +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank())
+```
+
+Notes:
+Did a quick ggpairs on a select set of variables and a sample set of 10000 observations for me to scan for useful correlations to analyse.
+
+```{r}
+#Factoring of Income Range to determine arrangement of plots
+
+loans$IncomeRange = factor(loans$IncomeRange,
+                           levels = c('Not displayed','Not employed','$0',
+                                      '$1-24,999','$25,000-49,999',
+                                      '$50,000-74,999','$75,000-99,999',
+                                      '$100,000+'))
+
+ggplot(data = loans, aes(x = LoanStatus)) + 
+  geom_bar(stat = "count", fill = I('#2C858D')) + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  facet_wrap(~IncomeRange, ncol = 4)
+```
+
+Notes:
+It can be observed that from here that the 2 income brackets that are most active in taking loans are the middle brackets $25000-49999 bracket and the $50000-74999 bracket. Loans that go to lower income or indeterminiate income brackets makes less loans on the platform and tend to have a lower completion rate.
+
+```{r}
+ggplot(data = loans, aes(y = DebtToIncomeRatio, x = IncomeRange)) + 
+  geom_boxplot(aes(fill = IncomeRange)) + 
+  guides(fill = guide_legend(title = "Income Range")) + 
+  scale_fill_brewer(type = 'qual', palette = 2) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+```{r}
+with(loans, by(DebtToIncomeRatio, IncomeRange, summary))
+```
+
+
+Notes:
+Higher income groups have lower median debt to income ratio and lower variances. I was slightly surprised at the latter statistic, thinking that people with higher income could take on more debt to finance bigger purchases and ventures whereas people in lower income groups would have to be generally more disciplined in their spending.
+
+```{r}
+#To visualise the different composition of Prosper Ratings within each Income
+#Range, bars are converted to the same height using proportions.
+
+loans_income_rating <- subset(loans, ProsperRating..Alpha. != "") %>%
+  group_by(IncomeRange, ProsperRating..Alpha.) %>%
+  summarise(count = n() ) %>%
+  mutate(prop = count / sum(count))
+
+ggplot(data = loans_income_rating, 
+       aes(x = IncomeRange, y = prop, fill = ProsperRating..Alpha.)) +
+  geom_bar(stat = 'identity') + 
+  guides(fill = guide_legend(title = "Prosper Rating")) + 
+  scale_fill_brewer(type = 'div', palette = 8, direction = -1) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  ylab('Percentage') + 
+  xlab('Income Range')
+```
+
+Notes:
+Income Range is an important aspect of Prosper Ratings. As can be observed, proportion of borrowers with good ratings consistently goes up in higher income brackets.
+
+```{r}
+#X-axis is limited to one to exclude a couple of outliers
+
+ggplot(data = loans, aes(x = BankcardUtilization, y = LoanOriginalAmount)) +
+  geom_point(aes(color = ProsperRating..Alpha.), alpha = 1/4) + 
+  xlim(0,1) +
+  scale_color_brewer(type = 'div', palette = 8, direction = -1,
+                     guide = guide_legend(title = 'Prosper Rating',
+                                          override.aes = list(alpha = 1, 
+                                                              size = 2)))
+```
+
+Notes:
+Some further illumination of Prosper Ratings. In general, the higher a borrower's rating, the bigger their loans. This is probably enforced by Prosper's platform. Interestingly, as loan amounts exceed $20000, AA borrowers become scarce. Perhaps, this is a characteristic of the most responsible borrowers where money is never borrowed excessively or lightly.
+
+Also, given the same loan amount, borrowers with a higher Prosper rating tend to have a higher percentage of available credit. It makes sense that borrowers that have not exhausted their credit are less saddled with existing debt and more likely to be able to repay their loans.
+
+For some reason, HR borrowers seem to make loans of ~$4000 regardless of credit utilization. Perhaps this is the most convenient amount available to them on Prosper, where higher amounts have disproportionately high interest rates.
+
+
+```{r}
+ggplot(data = loans, aes(x = PercentFunded, y = Recommendations)) + 
+  geom_point(aes(color = LOA.bucket), alpha = 1/4, position = 'jitter') +
+  scale_color_brewer(type = 'qual', palette = 3,
+                     guide = guide_legend(title = 'Original Loan Amounts',
+                                          override.aes = list(alpha = 1, 
+                                                              size = 2))) + 
+  facet_wrap(~ProsperRating..Alpha., ncol = 4)
+```
+
+Notes:
+Seems like there is no linear correlation between how much recommendations a loan listing gets and how much it gets funded. What can be observed is that loans that are fully funded tend to have 0 - 5 recommendations whilst loans that are not tend to have no recommendations.
+
+Loan amounts seem to have some influence as to how much it is funded if the borrower has a rating of C and above, where bigger loans tend to be more incompletely funded. Inerestingly, the biggest loans (>20000) seem to be better funded that those in the 10 - 20k range. This might be due to better returns for bigger loans, thus attracting more investment.
+
+```{r}
+
+ggplot(data = loans, aes(x = AvailableBankcardCredit, y = AmountDelinquent)) + 
+  geom_point(aes(color = IncomeRange), alpha = 1/10) + 
+  scale_x_log10() +
+  scale_y_log10() +
+  scale_color_brewer(type = 'qual', palette = 2,
+                     guide = guide_legend(title = 'Income Range',
+                                          override.aes = list(alpha = 1, size = 2)))
+```
+
+Notes:
+This last plot has less to do with Prosper as a platform. Rather, I was interested in exploring financial discipline on a slightly more macro level through understanding the relationship between availability of credit, delinquency and income. I was rather suprised by what I found, or the lack thereof.
+
+This illustrates a whole spectrum of people with different payment/credit situations. (i.e there doesn't seem to be any correlation between how much credit is available and the amount of delinquency people can fall into)
+
+The first is the line along the y-axis which seems to indicate a group of people that get into varying extents of delinquencies and have no available credit.
+
+The second is the line along the x-axis which seems to indicate a group of people with healthy amounts of credit available and never miss a payment.
+
+The third is a cluster in the center that indicates a whole range of people who have available credit but also miss their payments. It is to be noted that this cluster is more concentrated where amounts are larger (i.e. people tend to miss payments and have available credits in excess of thousands of dollars).
+
+Also rather surprisingly, this spectrum applies to people regardless of income range. I suppose the positive takeaway is everyone, regardless of how much they earn strive to be closer to the x-axis.
+
+<h1>Final Plots</h1>
+```{r}
+#Factor is to rearrange Status for maximum visual comparison
+
+pr_com_ratio$LoanStatus = factor(pr_com_ratio$LoanStatus,
+                           levels = c('Completed','FinalPaymentInProgress','Defaulted','Past Due (1-15 days)','Past Due (16-30 days)',
+                                      'Past Due (31-60 days)','Past Due (61-90 days)','Past Due (91-120 days)', 'Past Due (>120 days)',
+                                      'Chargedoff'))
+
+ggplot(data = pr_com_ratio, aes(x = ProsperRating..Alpha., y = prop, fill = LoanStatus)) +
+  geom_bar(stat = 'identity') + 
+  guides(fill = guide_legend(title = "Loan Status")) + 
+  scale_fill_brewer(type = 'div', palette = 2, direction = -1) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  ggtitle('Loan Completion rates in all Prosper Ratings') + 
+  ylab('Proportion') + 
+  xlab('Prosper Rating')
+```
+
+Notes:
+Looking at loans post-2009 that have past their term, it is clear that Prosper Ratings are successful in determining whether a loan would be paid off. Prosper has constructed a helpful indicator that investors can count on in assessing risk. 
+
+```{r}
+ggplot(data = loans, aes(x = LoanOriginationQuarter)) + 
+  geom_line(aes(color = LOA.bucket, group = LOA.bucket), stat = 'count') + 
+  guides(color = guide_legend(title = "Loan Amount (USD)")) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  ggtitle('Growth of different loan sizes') + 
+  ylab('No. of loans') + 
+  xlab('Period')
+```
+
+Notes:
+Smaller loans (below $15000) are seeing rapid growth while bigger loans (above $15000) are starting to gain traction. Yet, this is but a fraction of the total loans made in the US. If this traction can be sustained, exciting times are ahead for the peer-to-peer lending industry and Prosper.
+
+```{r}
+#X-scale is altered to start when Prosper Ratings were implemented
+
+ggplot(data = loans, aes(x = LoanOriginationQuarter)) + 
+  geom_line(aes(color = ProsperRating..Alpha., group = ProsperRating..Alpha.), 
+            stat = 'count') + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  guides(color = guide_legend(title = "Prosper Rating")) + 
+  scale_color_brewer(type = 'qual', palette = 2, direction = -1) +
+  scale_x_discrete(limits = c('Q3 2009','Q4 2009',
+                              'Q1 2010','Q2 2010','Q3 2010','Q4 2010',
+                              'Q1 2011','Q2 2011','Q3 2011','Q4 2011',
+                              'Q1 2012','Q2 2012','Q3 2012','Q4 2012',
+                              'Q1 2013','Q2 2013','Q3 2013','Q4 2013',
+                              'Q1 2014')) + 
+  ggtitle('Growth of loans of different Prosper Ratings') + 
+  ylab('No. of loans') + 
+  xlab('Period')
+```
+
+Notes:
+Prosper is not only growing the number and size of loans on its marketplace, it is also growing the quality of loans. Since 2013, A - C loans have increased much more rapidly than the other groups. In addition, HR loans have decreased. An interesting question though would be how Prosper would continue to sustain a wide spectrum of risk to attract investors who are looking for higher yields (since higher risk loans = higher yields).
+
+
+<h1>Reflections</h1>
+
+This was a fun exercise. Coming into this, I had no knowledge about loans, credits or how a p2p loan marketplace works. In trying to make sense of the data, I spent probably as much if not more time reading up on this space along with trying to hone my R skills. And while I appreciated more thoroughly how domain knowledge can be so valuable, I am definitely more confident in my skills to explore a dataset. I would like to compare this data with a wider loan dataset to understand how p2p lending is performing in a wider loan space, how Prosper loans compare as a loan option as compared to other platforms and mediums and how Prosper loans compare as an investment asset compared to other instruments. Statistics is helpful in looking back and understand what has happened, but I would also like to be able to use this data to be able to predict the risk of future loans.
+
+Regretfully, while I did refer to numerous sources for help, it is only while writing this do I realise I did not save any of them. :(
