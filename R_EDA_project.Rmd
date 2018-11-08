@@ -17,11 +17,12 @@ library(tidyverse)
 library(GGally)
 library(scales)
 library(memisc)
-loans <- read.csv("https://www.google.com/url?q=https://s3.amazonaws.com/udacity-hosted-downloads/ud651/prosperLoanData.csv&sa=D&ust=1537996947824000")
+loans <- read.csv("prosperLoanData.csv")
 
 # To get an understanding of the variables I am dealing with
 str(loans)
 ```
+
 
 ```{r}
 # Just to get a feel of the data
