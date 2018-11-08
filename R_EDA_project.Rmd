@@ -1,9 +1,7 @@
 ---
 title: "R Notebook"
 output:
-  html_document:
-    df_print: paged
-    keep_md: true
+  rmarkdown::github_document
   pdf_document: default
 ---
 ```{r global_options, include=FALSE}
