@@ -425,6 +425,7 @@ The third is a cluster in the center that indicates a whole range of people who 
 Also rather surprisingly, this spectrum applies to people regardless of income range. I suppose the positive takeaway is everyone, regardless of how much they earn strive to be closer to the x-axis.
 
 <h1>Final Plots</h1>
+
 ```{r}
 #Factor is to rearrange Status for maximum visual comparison
 
