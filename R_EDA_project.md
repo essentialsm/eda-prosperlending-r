@@ -339,8 +339,8 @@ However since 2012, bigger loans (5000 - 15000) started to gain popularity, poss
 
 The success of bigger loan sizes might have encouraged a larger maximum limit to loans. As can be observed, from 2013, loan size in excess of 25000 was introduced. If indeed bigger loans on Prosper are becoming more mainstream, this points to exciting future possiblities for the platform.
 
-    ## 
-    ## FALSE  TRUE 
+    ##
+    ## FALSE  TRUE
     ## 27814 86123
 
 ![](README_figs/README-unnamed-chunk-13-1.png)
@@ -391,31 +391,31 @@ Excluding current loans, the new grade set indicates better performance across a
 ![](README_figs/README-unnamed-chunk-18-1.png)
 
     ## ProsperRating..Alpha.: AA
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ## 0.03000 0.05990 0.06790 0.06911 0.07450 0.20000 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+    ## 0.03000 0.05990 0.06790 0.06911 0.07450 0.20000
+    ## --------------------------------------------------------
     ## ProsperRating..Alpha.: A
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##  0.0398  0.0890  0.1019  0.1029  0.1139  0.2050 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+    ##  0.0398  0.0890  0.1019  0.1029  0.1139  0.2050
+    ## --------------------------------------------------------
     ## ProsperRating..Alpha.: B
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##  0.0593  0.1314  0.1409  0.1444  0.1539  0.3400 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+    ##  0.0593  0.1314  0.1409  0.1444  0.1539  0.3400
+    ## --------------------------------------------------------
     ## ProsperRating..Alpha.: C
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##  0.0795  0.1665  0.1814  0.1844  0.1999  0.3400 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+    ##  0.0795  0.1665  0.1814  0.1844  0.1999  0.3400
+    ## --------------------------------------------------------
     ## ProsperRating..Alpha.: D
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##  0.1057  0.2187  0.2392  0.2364  0.2525  0.3400 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+    ##  0.1057  0.2187  0.2392  0.2364  0.2525  0.3400
+    ## --------------------------------------------------------
     ## ProsperRating..Alpha.: E
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##  0.1379  0.2612  0.2825  0.2833  0.3049  0.3400 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+    ##  0.1379  0.2612  0.2825  0.2833  0.3049  0.3400
+    ## --------------------------------------------------------
     ## ProsperRating..Alpha.: HR
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
     ##  0.1679  0.3034  0.3077  0.3073  0.3077  0.3400
 
 Notes: From an investor/lender's perspective, Prosper Ratings is an important factor in determining yield. Riskier loans have higher yields as can be observed from the boxplot and stat summaries above.
@@ -431,35 +431,35 @@ Notes: It can be observed that from here that the 2 income brackets that are mos
 ![](README_figs/README-unnamed-chunk-22-1.png)
 
     ## IncomeRange: Not displayed
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    ##   0.000   0.090   0.160   0.297   0.260  10.010     124 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's
+    ##   0.000   0.090   0.160   0.297   0.260  10.010     124
+    ## --------------------------------------------------------
     ## IncomeRange: Not employed
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    ##   0.010   0.160   0.295   3.328  10.010  10.010     728 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's
+    ##   0.010   0.160   0.295   3.328  10.010  10.010     728
+    ## --------------------------------------------------------
     ## IncomeRange: $0
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    ##      NA      NA      NA     NaN      NA      NA     621 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's
+    ##      NA      NA      NA     NaN      NA      NA     621
+    ## --------------------------------------------------------
     ## IncomeRange: $1-24,999
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    ##   0.020   0.190   0.320   0.737   0.500  10.010     913 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's
+    ##   0.020   0.190   0.320   0.737   0.500  10.010     913
+    ## --------------------------------------------------------
     ## IncomeRange: $25,000-49,999
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    ##  0.0100  0.1700  0.2600  0.2789  0.3600  7.9000    2311 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's
+    ##  0.0100  0.1700  0.2600  0.2789  0.3600  7.9000    2311
+    ## --------------------------------------------------------
     ## IncomeRange: $50,000-74,999
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    ##  0.0100  0.1600  0.2300  0.2457  0.3200 10.0100    1690 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's
+    ##  0.0100  0.1600  0.2300  0.2457  0.3200 10.0100    1690
+    ## --------------------------------------------------------
     ## IncomeRange: $75,000-99,999
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    ##  0.0100  0.1400  0.2000  0.2137  0.2800  2.5500     901 
-    ## -------------------------------------------------------- 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's
+    ##  0.0100  0.1400  0.2000  0.2137  0.2800  2.5500     901
+    ## --------------------------------------------------------
     ## IncomeRange: $100,000+
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's
     ##  0.0000  0.1200  0.1700  0.1806  0.2300 10.0100    1266
 
 Notes: Higher income groups have lower median debt to income ratio and lower variances. I was slightly surprised at the latter statistic, thinking that people with higher income could take on more debt to finance bigger purchases and ventures whereas people in lower income groups would have to be generally more disciplined in their spending.
@@ -499,6 +499,7 @@ Also rather surprisingly, this spectrum applies to people regardless of income r
 <h1>
 Final Plots
 </h1>
+
 ![](README_figs/README-unnamed-chunk-28-1.png)
 
 Notes: Looking at loans post-2009 that have past their term, it is clear that Prosper Ratings are successful in determining whether a loan would be paid off. Prosper has constructed a helpful indicator that investors can count on in assessing risk.
